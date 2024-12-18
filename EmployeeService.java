@@ -10,10 +10,11 @@ public class EmployeeService {
 
     private HashSet<Employee> empset = new HashSet<>();
 
-    private Employee emp1 = new Employee(101, "Shital", 24, "Developer", "IT", 25000);
-    private Employee emp2 = new Employee(102, "Meena", 26, "Tester", "CO", 57000);
-    private Employee emp3 = new Employee(103, "Bob", 20, "DevOps Eng", "Admin", 5000);
-    private Employee emp4 = new Employee(104, "Max", 27, "System Eng", "CO", 70000);
+    private Employee emp1 = new Employee(101, "Yaja", 24, "Developer", "IT", 25000);
+    private Employee emp2 = new Employee(102, "Dio", 26, "Tester", "CO", 57000);
+    private Employee emp3 = new Employee(103, "Arsyad", 30, "Admin", "CO", 5000);
+    private Employee emp4 = new Employee(104, "Bayu", 27, "Engineer", "CO", 70000);
+    private Employee emp5 = new Employee(105, "Nando", 29, "Maintanance", "CO", 75000);
 
     private Scanner sc = new Scanner(System.in);
 
@@ -22,6 +23,7 @@ public class EmployeeService {
         empset.add(emp2);
         empset.add(emp3);
         empset.add(emp4);
+        empset.add(emp5);
     }
 
     public void viewAllEmps(String sortBy) {
