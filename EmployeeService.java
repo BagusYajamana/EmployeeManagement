@@ -1,180 +1,163 @@
-package employee;
+package package_employee;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
+//import java.util.stream.Collectors;
 
 public class EmployeeService {
+    private final EmployeeRepository repository;
+    private final Scanner scanner = new Scanner(System.in);
 
-    private HashSet<Employee> empset = new HashSet<>();
-
-    private Employee emp1 = new Employee(101, "Yaja", 24, "Developer", "IT", 25000);
-    private Employee emp2 = new Employee(102, "Dio", 26, "Tester", "CO", 57000);
-    private Employee emp3 = new Employee(103, "Arsyad", 30, "Admin", "CO", 5000);
-    private Employee emp4 = new Employee(104, "Bayu", 27, "Engineer", "CO", 70000);
-    private Employee emp5 = new Employee(105, "Nando", 29, "Maintanance", "CO", 75000);
-
-    private Scanner sc = new Scanner(System.in);
-
-    public EmployeeService() {
-        empset.add(emp1);
-        empset.add(emp2);
-        empset.add(emp3);
-        empset.add(emp4);
-        empset.add(emp5);
+    public EmployeeService(EmployeeRepository repository) {
+        this.repository = repository;
     }
 
-    public void viewAllEmps(String sortBy) {
-    	Scanner scanner = new Scanner(System.in);
-        if (empset.isEmpty()) {
-            System.out.println("No employees to display.");
-            return;
+    public void addEmployee() {
+        System.out.print("Enter ID: ");
+        int id = scanner.nextInt();
+        System.out.print("Enter Name: ");
+        String name = scanner.next();
+        System.out.print("Enter Age: ");
+        int age = scanner.nextInt();
+        System.out.print("Enter Designation: ");
+        String designation = scanner.next();
+        System.out.print("Enter Department: ");
+        String department = scanner.next();
+        System.out.print("Enter Salary: ");
+        double salary = scanner.nextDouble();
+
+        Employee employee = new Employee(id, name, age, designation, department, salary);
+        if (repository.save(employee)) {
+            System.out.println("Employee added successfully.");
+        } else {
+            System.out.println("Employee with ID already exists.");
         }
+    }
 
-        List<Employee> empList = new ArrayList<Employee>(empset);
+    public void viewEmployee(int id) {
+        Employee employee = repository.findById(id);
+        if (employee != null) {
+            System.out.println(employee);
+        } else {
+            System.out.println("Employee not found.");
+        }
+    }
 
-        System.out.println("Choose the field to sort employees:");
-        System.out.println("1. ID");
-        System.out.println("2. Name");
-        System.out.println("3. Age");
-        System.out.println("4. Salary");
-        System.out.println("5. Department");
+    public void viewAllEmployees() {
+        List<Employee> employees = new ArrayList<>(repository.findAll());
+
+        System.out.println("\nChoose sorting option:");
+        System.out.println("1. By ID");
+        System.out.println("2. By Name");
+        System.out.println("3. By Age");
+        System.out.println("4. By Salary (Descending)");
+        System.out.println("5. By Department");
         System.out.print("Enter your choice (1-5): ");
-        
-        int choice = scanner.nextInt();
-        String sortBy1 = "";
 
+        int choice = scanner.nextInt();
         switch (choice) {
             case 1:
-                sortBy1 = "id";
-                empList.sort(Comparator.comparingInt(Employee::getId));
+                employees.sort(Comparator.comparing(Employee::getId));
                 break;
             case 2:
-                sortBy1 = "name";
-                empList.sort(Comparator.comparing(Employee::getName));
+                employees.sort(Comparator.comparing(Employee::getName));
                 break;
             case 3:
-                sortBy1 = "age";
-                empList.sort(Comparator.comparingInt(Employee::getAge));
+                employees.sort(Comparator.comparing(Employee::getAge));
                 break;
             case 4:
-                sortBy1 = "salary";
-                empList.sort(Comparator.comparingDouble(Employee::getSalary).reversed());
+                employees.sort(Comparator.comparing(Employee::getSalary).reversed());
                 break;
             case 5:
-                sortBy1 = "department";
-                empList.sort(Comparator.comparing(Employee::getDepartment));
+                employees.sort(Comparator.comparing(Employee::getDepartment));
                 break;
             default:
                 System.out.println("Invalid choice! Defaulting to sorting by ID.");
-                sortBy1 = "id";
-                break;
+                employees.sort(Comparator.comparing(Employee::getId));
         }
 
-
-        System.out.println("\n--- All Employees (Sorted by " + sortBy1 + ") ---");
-        for (Employee emp : empList) {
-            System.out.println(emp);
+        if (employees.isEmpty()) {
+            System.out.println("\nNo employees to display.");
+            return;
         }
+
+        System.out.println("\n--- Employee List ---");
+        System.out.println("\n=======================================================================");
+        System.out.println("| ID   | Name         | Age  | Designation  | Department | Salary     |");
+        System.out.println("=======================================================================");
+
+        for (Employee emp : employees) {
+            System.out.printf(
+                    "| %-4d | %-12s | %-4d | %-12s | %-10s | %-10.2f |\n",
+                    emp.getId(),
+                    emp.getName(),
+                    emp.getAge(),
+                    emp.getDesignation(),
+                    emp.getDepartment(),
+                    emp.getSalary()
+            );
+        }
+
+        System.out.println("=======================================================================");
+        
+        //employees.forEach(System.out::println);
     }
 
-    public void viewEmp() {
-        System.out.print("Enter Employee ID to view: ");
-        int id = sc.nextInt();
-        boolean found = false;
+    public void updateEmployee(int id) {
+        Employee employee = repository.findById(id);
 
-        for (Employee emp : empset) {
-            if (emp.getId() == id) {
-                System.out.println("\nEmployee Details:");
-                System.out.println(emp);
-                found = true;
-                break;
+        if (employee != null) {
+            System.out.println("Current details:");
+            System.out.println(employee);
+
+            System.out.println("\nEnter new details (type 'skip' to keep the current value):");
+
+            System.out.print("Enter new Name: ");
+            String name = scanner.next();
+            if (!name.equalsIgnoreCase("skip")) {
+                employee.setName(name);
             }
-        }
 
-        if (!found) {
-            System.out.println("Employee with ID " + id + " is not present.");
-        }
-    }
-
-    public void updateEmployee() {
-        System.out.print("Enter Employee ID to update: ");
-        int id = sc.nextInt();
-        boolean found = false;
-
-        for (Employee emp : empset) {
-            if (emp.getId() == id) {
-                System.out.print("Enter new name: ");
-                String name = sc.next();
-                System.out.print("Enter new salary: ");
-                double sal = sc.nextDouble();
-
-                emp.setName(name);
-                emp.setSalary(sal);
-
-                System.out.println("\nUpdated Employee Details:");
-                System.out.println(emp);
-                found = true;
-                break;
+            System.out.print("Enter new Age: ");
+            String ageInput = scanner.next();
+            if (!ageInput.equalsIgnoreCase("skip")) {
+                int age = Integer.parseInt(ageInput);
+                employee.setAge(age);
             }
-        }
 
-        if (!found) {
-            System.out.println("Employee with ID " + id + " is not present.");
-        } else {
-            System.out.println("Employee details updated successfully!");
-        }
-    }
-
-    public void deleteEmp() {
-        System.out.print("Enter Employee ID to delete: ");
-        int id = sc.nextInt();
-        boolean found = false;
-        Employee empToDelete = null;
-
-        for (Employee emp : empset) {
-            if (emp.getId() == id) {
-                empToDelete = emp;
-                found = true;
-                break;
+            System.out.print("Enter new Designation: ");
+            String designation = scanner.next();
+            if (!designation.equalsIgnoreCase("skip")) {
+                employee.setDesignation(designation);
             }
-        }
 
-        if (!found) {
-            System.out.println("Employee with ID " + id + " is not present.");
+            System.out.print("Enter new Department: ");
+            String department = scanner.next();
+            if (!department.equalsIgnoreCase("skip")) {
+                employee.setDepartment(department);
+            }
+
+            System.out.print("Enter new Salary: ");
+            String salaryInput = scanner.next();
+            if (!salaryInput.equalsIgnoreCase("skip")) {
+                double salary = Double.parseDouble(salaryInput);
+                employee.setSalary(salary);
+            }
+
+            System.out.println("\nUpdated Employee Details:");
+            System.out.println(employee);
+
+            System.out.println("Employee updated successfully.");
         } else {
-            empset.remove(empToDelete);
-            System.out.println("Employee deleted successfully!");
+            System.out.println("Employee not found.");
         }
     }
 
-    public void addEmp() {
-        System.out.print("Enter Employee ID: ");
-        int id = sc.nextInt();
-        System.out.print("Enter name: ");
-        String name = sc.next();
-        System.out.print("Enter age: ");
-        int age = sc.nextInt();
-        System.out.print("Enter designation: ");
-        String designation = sc.next();
-        System.out.print("Enter department: ");
-        String department = sc.next();
-        System.out.print("Enter salary: ");
-        double sal = sc.nextDouble();
 
-        Employee newEmp = new Employee(id, name, age, designation, department, sal);
-
-        if (empset.add(newEmp)) {
-            System.out.println("\nNew Employee Added Successfully:");
-            System.out.println(newEmp);
+    public void deleteEmployee(int id) {
+        if (repository.deleteById(id)) {
+            System.out.println("Employee deleted successfully.");
         } else {
-            System.out.println("Employee with ID " + id + " already exists.");
+            System.out.println("Employee not found.");
         }
     }
-    
-
-
-
 }
